@@ -12,4 +12,4 @@ posts_blueprint = Blueprint('posts_blueprint',
 def post_all_page():
     """Вьюшка для всех постов"""
     posts: List[dict] = posts_dao.get_all()
-    return render_template('')
+    return render_template('post.html', posts=posts)

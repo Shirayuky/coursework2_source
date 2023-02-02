@@ -1,3 +1,5 @@
+from typing import List
+
 from flask import Flask, render_template
 from app.bookmarks.views import bookmarks_blueprint
 from app.comments.views import comments_blueprint
@@ -12,7 +14,8 @@ app.register_blueprint(posts_blueprint)
 
 @app.route('/')
 def index_page():
-    return render_template('index.html')
+    posts: List[dict] = posts_blueprint.get_all()
+    return render_template('index.html', posts=posts)
 
 
 if __name__ == '__main__':
