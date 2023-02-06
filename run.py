@@ -2,7 +2,7 @@ from typing import List
 
 from flask import Flask, render_template
 from app.bookmarks.views import bookmarks_blueprint
-from app.comments.views import comments_blueprint
+from app.posts.comments.views import comments_blueprint
 from app.posts.views import posts_blueprint
 
 app = Flask(__name__,

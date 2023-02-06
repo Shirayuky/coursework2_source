@@ -1,0 +1,2 @@
+class DataErrorHandler(Exception):
+    pass
