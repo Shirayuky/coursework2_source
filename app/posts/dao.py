@@ -26,36 +26,36 @@ class Posts:
         self.likes_count = likes_count
         self.pk = pk
 
-        self.path = ''
+        self.post_path = ''
 
     def __repr__(self):
-        return f"Post(" \
-               f"{self.pk}; " \
-               f"{self.poster_name}; " \
-               f"{self.poster_avatar}; " \
-               f"{self.pic}; " \
-               f"{self.content}; " \
-               f"{self.views_count}; " \
-               f"{self.likes_count}; " \
-               f")"
+        return f"Post()\n" \
+               f"pk: {self.pk}" \
+               f"Name: {self.poster_name}\n"
 
 
 class PostDAO(Posts):
     """
-    Класс доступа к данным постов
+    Менеджер постов:
+    1. загрузка
+    2. get_all()
+    3. get_by_pk(pk)
+    4. search_by_query(search_word)
+    5. get_posts_by_user(user_name)
     """
 
-    def __init__(self, path):
-        Posts.__init__(self, path)
-        self.path = path
+    def __init__(self, post_path, comments_path):
+        Posts.__init__(self, post_path)
+        self.post_path = post_path
+        self.comments_path = comments_path
 
     def _load(self) -> List[dict]:
         """Загружает данные из JSON"""
         try:
-            with open(self.path, 'r', encoding='utf-8') as file:
+            with open(self.post_path, 'r', encoding='utf-8') as file:
                 data = json.load(file)
         except (FileNotFoundError, JSONDecodeError):
-            raise DataErrorHandler(f"Не удается получить данные постов из файла {self.path}")
+            raise DataErrorHandler(f"Не удается получить данные постов из файла {self.post_path}")
         return data
 
     def _load_post_of_list(self) -> List:
@@ -64,7 +64,7 @@ class PostDAO(Posts):
         return: Список экземпляров класса Post
         """
         posts_data = self._load()
-        list_of_posts = [Posts(**posts) for posts in posts_data]  # '**posts' - аргументы в словарь
+        list_of_posts = [Posts(**posts) for posts in posts_data]  # '**posts' - аргументы в словарь (без форматирования)
         return list_of_posts
 
     def get_all(self) -> List[dict]:
@@ -74,19 +74,29 @@ class PostDAO(Posts):
 
     def get_by_pk(self, pk: int) -> dict:
         """Получает пост по его pk"""
-        posts = self._load()
-        for post in posts:
-            if post['pk'] == pk:
-                return post
+        try:
+            posts = self._load()
+            for post in posts:
+                if post['pk'] == pk:
+                    return post
+        except ValueError:
+            print(f"Ошибки (и/или):\n"
+                  f"1) {pk} - е число\n"
+                  f"2) ПК со значением: {pk} отсутствует в БД")
 
     def search_by_query(self, search_word: str) -> List[dict]:
         """Ищет и получает посты по ключевому слову в контенте"""
-        posts = self._load()
-        found_posts = []
-        for post in posts:
-            if search_word.lower() in post['content'].lower():
-                found_posts.append(post)
-        return found_posts
+        try:
+            posts = self._load()
+            found_posts = []
+            for post in posts:
+                if search_word.lower() in post['content'].lower():
+                    found_posts.append(post)
+            return found_posts
+        except ValueError:
+            print(f"Ошибки (и/или):\n"
+                  f"1) В ключевом слове {search_word} ошибка\n"
+                  f"2) Ключевого слова {search_word} нет ни в одном из контекстов")
 
     def get_posts_by_user(self, user_name: str) -> List[dict]:
         """Ищет и получает все посты искомого автора"""
@@ -98,9 +108,9 @@ class PostDAO(Posts):
                     author_posts.append(post)
             return author_posts
         except ValueError:
-            print(f"Пользователя с именем {user_name} нет в БД",
-                  f"или {user_name} еще не опубликовал пост")
+            print(f"Ошибки (и/или):\n"
+                  f"1) Пользователя с именем {user_name} нет в БД\n"
+                  f"2) {user_name} еще не опубликовал пост")
 
-
-pd = PostDAO('../../data/posts.json')
-pprint.pprint(pd.get_posts_by_user('leo'))
+# p = PostDAO('../../data/posts.json', '../../data/comments.json')
+# pprint.pprint(p.get_all())
