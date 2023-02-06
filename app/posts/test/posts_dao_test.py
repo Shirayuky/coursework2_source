@@ -23,7 +23,7 @@ class TestPostsDao:
     def test_get_all(self, posts_dao):
         """Проверяет вывод всех постов"""
         posts = posts_dao.get_all()
-        assert type(posts) == List, "Тип постов не список"
+        assert type(posts) == List[dict], "Тип постов не словари в виде списка"
         assert len(posts) > 0, "Список постов пуст"
         assert set(posts[0].keys()) == keys_should_be, "Ключи постов не сходятся с ожидаемыми"
 
