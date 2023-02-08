@@ -44,12 +44,11 @@ class PostDAO(Posts):
     5. get_posts_by_user(user_name)
     """
 
-    def __init__(self, post_path, comments_path):
+    def __init__(self, post_path):
         Posts.__init__(self, post_path)
         self.post_path = post_path
-        self.comments_path = comments_path
 
-    def _load(self) -> List[dict]:
+    def load_data(self) -> List[dict]:
         """Загружает данные из JSON"""
         try:
             with open(self.post_path, 'r', encoding='utf-8') as file:
@@ -58,36 +57,51 @@ class PostDAO(Posts):
             raise DataErrorHandler(f"Не удается получить данные постов из файла {self.post_path}")
         return data
 
+    def pretty_print_json(self):
+        posts_data = self.load_data()
+        inf = json.dumps(posts_data, sort_keys=False, indent=4, separators=(',', ': '))
+        return inf
+
+    def pretty_print_json_by_pk(self, pk):
+        try:
+            posts_data = self.load_data()
+            for post in posts_data:
+                if post['pk'] == pk:
+                    return post.encode('cp1251')
+        except:
+            return post.encode('cp866')
+
+
     def _load_post_of_list(self) -> List:
         """
         Загружает все посты в список
         return: Список экземпляров класса Post
         """
-        posts_data = self._load()
+        posts_data = self.load_data()
         list_of_posts = [Posts(**posts) for posts in posts_data]  # '**posts' - аргументы в словарь (без форматирования)
         return list_of_posts
 
     def get_all(self) -> List[dict]:
         """Получает все посты"""
-        posts = self._load()
+        posts = self.load_data()
         return posts
 
     def get_by_pk(self, pk: int) -> dict:
         """Получает пост по его pk"""
         try:
-            posts = self._load()
+            posts = self.load_data()
             for post in posts:
                 if post['pk'] == pk:
                     return post
         except ValueError:
             print(f"Ошибки (и/или):\n"
-                  f"1) {pk} - е число\n"
+                  f"1) {pk} - не число\n"
                   f"2) ПК со значением: {pk} отсутствует в БД")
 
     def search_by_query(self, search_word: str) -> List[dict]:
         """Ищет и получает посты по ключевому слову в контенте"""
         try:
-            posts = self._load()
+            posts = self.load_data()
             found_posts = []
             for post in posts:
                 if search_word.lower() in post['content'].lower():
@@ -101,7 +115,7 @@ class PostDAO(Posts):
     def get_posts_by_user(self, user_name: str) -> List[dict]:
         """Ищет и получает все посты искомого автора"""
         try:
-            posts = self._load()
+            posts = self.load_data()
             author_posts = []
             for post in posts:
                 if post['poster_name'].lower() == user_name.lower():
@@ -112,5 +126,6 @@ class PostDAO(Posts):
                   f"1) Пользователя с именем {user_name} нет в БД\n"
                   f"2) {user_name} еще не опубликовал пост")
 
-# p = PostDAO('../../data/posts.json', '../../data/comments.json')
+
+# p = PostDAO("../../data/posts.json")
 # pprint.pprint(p.get_all())

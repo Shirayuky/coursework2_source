@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SKYPROGRAM</title>
-  <link href="../static/css/styles.min.css" rel="stylesheet">
+  <link href="/static/css/styles.min.css" rel="stylesheet">
 </head>
 
 <body>
@@ -27,7 +27,7 @@
 
     <div class="search">
       <form action="/search" class="search__form">
-        <input type="search" class="search__input">
+        <input type="search" name="s" class="search__input">
       </form>
     </div>
 
@@ -60,7 +60,7 @@
           </button>
         </div>
       </div>
-      {% end post %}
+      {% endfor %}
     </section>
 
 
