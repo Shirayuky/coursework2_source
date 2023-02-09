@@ -57,21 +57,6 @@ class PostDAO(Posts):
             raise DataErrorHandler(f"Не удается получить данные постов из файла {self.post_path}")
         return data
 
-    def pretty_print_json(self):
-        posts_data = self.load_data()
-        inf = json.dumps(posts_data, sort_keys=False, indent=4, separators=(',', ': '))
-        return inf
-
-    def pretty_print_json_by_pk(self, pk):
-        try:
-            posts_data = self.load_data()
-            for post in posts_data:
-                if post['pk'] == pk:
-                    return post.encode('cp1251')
-        except:
-            return post.encode('cp866')
-
-
     def _load_post_of_list(self) -> List:
         """
         Загружает все посты в список
@@ -80,6 +65,12 @@ class PostDAO(Posts):
         posts_data = self.load_data()
         list_of_posts = [Posts(**posts) for posts in posts_data]  # '**posts' - аргументы в словарь (без форматирования)
         return list_of_posts
+
+    def load_data_for_jsonfy(self) -> List[dict]:
+        """Загружает данные из JSON"""
+        with open(self.post_path, 'r', encoding='utf-8') as file:
+            data = json.load(file)
+        return data
 
     def get_all(self) -> List[dict]:
         """Получает все посты"""
@@ -90,6 +81,18 @@ class PostDAO(Posts):
         """Получает пост по его pk"""
         try:
             posts = self.load_data()
+            for post in posts:
+                if post['pk'] == pk:
+                    return post
+        except ValueError:
+            print(f"Ошибки (и/или):\n"
+                  f"1) {pk} - не число\n"
+                  f"2) ПК со значением: {pk} отсутствует в БД")
+
+    def get_by_pk_for_jsonfy(self, pk: int) -> dict:
+        """Получает пост по его pk"""
+        try:
+            posts = self.load_data_for_jsonfy()
             for post in posts:
                 if post['pk'] == pk:
                     return post
@@ -125,7 +128,6 @@ class PostDAO(Posts):
             print(f"Ошибки (и/или):\n"
                   f"1) Пользователя с именем {user_name} нет в БД\n"
                   f"2) {user_name} еще не опубликовал пост")
-
 
 # p = PostDAO("../../data/posts.json")
 # pprint.pprint(p.get_all())
